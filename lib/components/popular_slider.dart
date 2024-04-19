@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hakibah/constatns.dart';
 
@@ -14,12 +15,14 @@ class _SliderState extends ConsumerState<PopularSlider> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              "Popular Courses",
+              "Most Popular",
               style: TextStyle(
                   color: blackColor, fontSize: 16, fontWeight: FontWeight.w600),
             ),
@@ -30,7 +33,7 @@ class _SliderState extends ConsumerState<PopularSlider> {
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
                 decoration: BoxDecoration(
                     color: primaryColor,
-                    borderRadius: BorderRadius.circular(10)),
+                    borderRadius: BorderRadius.circular(5)),
                 child: Text(
                   "See All",
                   style: TextStyle(
@@ -66,6 +69,7 @@ class _SliderState extends ConsumerState<PopularSlider> {
         var isNetworkAvailable = await checkConnectivity();
         if (!isNetworkAvailable) {
           if (context.mounted) {
+            if (!mounted) return;
             showAlert(context, noInternetString, "error");
           }
           return;
@@ -79,13 +83,13 @@ class _SliderState extends ConsumerState<PopularSlider> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Container(
+            SizedBox(
               height: 50,
               width: 50,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(6),
-                child: Image.network(
-                  item["image"],
+                child: Image.asset(
+                  "assets/images/logo.png",
                   fit: BoxFit.fill,
                 ),
               ),
@@ -94,7 +98,7 @@ class _SliderState extends ConsumerState<PopularSlider> {
               width: 16,
             ),
             Text(
-              item["name"],
+              item["title"],
               style: TextStyle(
                   color: blackColor, fontWeight: FontWeight.w400, fontSize: 14),
               maxLines: 2,

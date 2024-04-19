@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hakibah/constatns.dart';
+import 'package:hakibah/screens/categories_screen.dart';
 import 'package:hakibah/screens/home_screen.dart';
 import 'package:persistent_bottom_nav_bar_v2/persistent-tab-view.dart';
 
@@ -56,7 +57,7 @@ class _PresistantNavbarState extends ConsumerState<PresistantNavbar> {
     List<Widget> screens() {
       return [
         const HomeScreen(),
-        const HomeScreen(),
+        const CategoryScreen(),
         const HomeScreen(),
         const HomeScreen(),
       ];
@@ -67,7 +68,7 @@ class _PresistantNavbarState extends ConsumerState<PresistantNavbar> {
       child: PersistentTabView(
         context,
         hideNavigationBarWhenKeyboardShows: true,
-        bottomScreenMargin: 50,
+        // bottomScreenMargin: 50,
         resizeToAvoidBottomInset: false,
         screens: screens(),
         confineInSafeArea: true,

@@ -5,7 +5,7 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 
 String appName = "Hakibah";
 Color primaryColor = const Color(0xff17b862);
-Color secondaryColor = Color.fromARGB(255, 225, 224, 224);
+Color secondaryColor = const Color.fromARGB(255, 225, 224, 224);
 Color whiteColor = Colors.white;
 Color blackColor = Colors.black;
 String noInternetString = "No Internet..";
@@ -25,7 +25,7 @@ InputDecoration inputDecoration({required String hintText, IconData? icon}) {
       fillColor: Colors.white,
       hintText: hintText,
       hintStyle: TextStyle(
-          color: secondaryColor.withOpacity(0.5),
+          color: blackColor.withOpacity(0.6),
           fontSize: 15,
           fontWeight: FontWeight.w300),
       disabledBorder: inputBorder,
@@ -101,10 +101,13 @@ Widget textFormFieldApp(
                 return null;
               },
         style: TextStyle(
-            fontSize: 15, color: secondaryColor, fontWeight: FontWeight.w400),
+            fontSize: 15, color: blackColor, fontWeight: FontWeight.w400),
         onSaved: (value) {
           onValueChanged(
               value!); // Call the callback function with the entered value
+        },
+        onChanged: (value) {
+          onValueChanged(value);
         },
         decoration: inputDecoration(hintText: hintText ?? name, icon: icon)),
   );

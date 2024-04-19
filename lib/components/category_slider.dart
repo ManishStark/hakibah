@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hakibah/constatns.dart';
+import 'package:hakibah/screens/categories_screen.dart';
+import 'package:hakibah/utils/reusable.dart';
 
 class CategorySlider extends ConsumerStatefulWidget {
   final dynamic categories;
@@ -24,13 +26,19 @@ class _CategorySliderState extends ConsumerState<CategorySlider> {
                   color: blackColor, fontSize: 16, fontWeight: FontWeight.w600),
             ),
             GestureDetector(
-              onTap: () {},
+              onTap: () {
+                goToNewScreen(
+                    context,
+                    const CategoryScreen(
+                      isBackButton: true,
+                    ));
+              },
               child: Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
                 decoration: BoxDecoration(
                     color: primaryColor,
-                    borderRadius: BorderRadius.circular(10)),
+                    borderRadius: BorderRadius.circular(5)),
                 child: Text(
                   "See All",
                   style: TextStyle(
@@ -66,6 +74,7 @@ class _CategorySliderState extends ConsumerState<CategorySlider> {
         var isNetworkAvailable = await checkConnectivity();
         if (!isNetworkAvailable) {
           if (context.mounted) {
+            if (!mounted) return;
             showAlert(context, noInternetString, "error");
           }
           return;
@@ -74,41 +83,18 @@ class _CategorySliderState extends ConsumerState<CategorySlider> {
       },
       child: Container(
         margin: const EdgeInsets.only(right: 16),
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Container(
-              height: 90,
-              width: 150,
-              decoration:
-                  BoxDecoration(borderRadius: BorderRadius.circular(10)),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(6),
-                child: Image.network(
-                  item["image"],
-                  fit: BoxFit.fill,
-                ),
-              ),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            Container(
-              width: 150,
-              decoration: BoxDecoration(color: whiteColor),
-              child: Text(
-                item["name"],
-                style: TextStyle(
-                    color: blackColor,
-                    fontWeight: FontWeight.w400,
-                    fontSize: 14),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+        decoration: BoxDecoration(
+            // boxShadow: boxShadow,
+            color: whiteColor,
+            borderRadius: BorderRadius.circular(5),
+            border: Border.all(width: 1, color: secondaryColor)),
+        child: Text(
+          item["title"],
+          style: TextStyle(
+              color: blackColor, fontWeight: FontWeight.w400, fontSize: 14),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ),
       ),
     );

@@ -1,18 +1,20 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hakibah/auth/sign_up_screen.dart';
 import 'package:hakibah/components/bottom_navigation.dart';
 import 'package:hakibah/constatns.dart';
+import 'package:hakibah/provider/user_provider.dart';
 import 'package:hakibah/utils/api_client.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool passObscure = true;
   bool isLoading = false;
   final formKey = GlobalKey<FormState>();
@@ -242,9 +244,11 @@ class _LoginScreenState extends State<LoginScreen> {
             requestBody: requestBody);
         if (response.statusCode == 200) {
           var decode = await jsonDecode(response.body);
-          if (!context.mounted) return;
+          if (!mounted) return;
           if (decode["code"] == "200") {
             setToken(decode["data"]["token"]);
+            ref.read(userProvider.notifier).setUser(decode["data"]["user"]);
+            if (!mounted) return;
             showAlert(context, "login succesful", "success");
             Navigator.pushReplacement(
                 context,
@@ -256,7 +260,7 @@ class _LoginScreenState extends State<LoginScreen> {
             showAlert(context, apiErrorString, "error");
           }
         } else {
-          if (!context.mounted) return;
+          if (!mounted) return;
           showAlert(context, apiErrorString, "error");
         }
         setState(() {

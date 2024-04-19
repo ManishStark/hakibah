@@ -27,6 +27,7 @@ class _SplashScreenState extends State<SplashScreen> {
     Timer(const Duration(seconds: 2), () async {
       String token = await getToken();
       if (mounted) {
+        if (!context.mounted) return;
         Navigator.of(context).pushReplacement(MaterialPageRoute(
             builder: (context) => token.isEmpty
                 ? const LoginScreen()

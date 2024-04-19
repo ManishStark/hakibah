@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hakibah/constatns.dart';
 
@@ -32,6 +33,7 @@ class _SliderState extends ConsumerState<SliderNormal> {
         var isNetworkAvailable = await checkConnectivity();
         if (!isNetworkAvailable) {
           if (context.mounted) {
+            if (!mounted) return;
             showAlert(context, noInternetString, "error");
           }
           return;
@@ -45,7 +47,7 @@ class _SliderState extends ConsumerState<SliderNormal> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Container(
+            SizedBox(
               height: 90,
               width: 150,
               child: ClipRRect(

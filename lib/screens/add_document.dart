@@ -1,20 +1,25 @@
 import 'dart:convert';
-
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_searchable_dropdown/flutter_searchable_dropdown.dart';
-import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hakibah/components/appbar.dart';
 import 'package:hakibah/constatns.dart';
+import 'package:hakibah/provider/user_provider.dart';
+import 'package:hakibah/screens/university_list.dart';
 import 'package:hakibah/utils/api_client.dart';
+import 'package:mime/mime.dart';
+import 'package:page_route_animator/page_route_animator.dart';
+import "package:http/http.dart" as http;
 
-class AddDocument extends StatefulWidget {
+class AddDocument extends ConsumerStatefulWidget {
   const AddDocument({super.key});
 
   @override
-  State<AddDocument> createState() => _AddDocumentState();
+  ConsumerState<AddDocument> createState() => _AddDocumentState();
 }
 
-class _AddDocumentState extends State<AddDocument> {
+class _AddDocumentState extends ConsumerState<AddDocument> {
   List<dynamic> categories = [
     {"title": "- Select Category -"}
   ];
@@ -22,27 +27,32 @@ class _AddDocumentState extends State<AddDocument> {
   List<dynamic> types = [
     {"title": "- Select Type -"}
   ];
+  var setCategory = {};
+  var setType = {};
   String typeValue = "- Select Type -";
-
-  var universities = [];
-  var universitiesCopy = [];
+  dynamic university = {"title": "- Select University -"};
   String title = "";
+  File? _image;
+  String? _file;
+  String base64Image = "";
+  dynamic user = {};
+  bool isLoading = false;
   @override
   void initState() {
     getCategoryApiCall();
     getTypeApiCall();
-    getUniversityApiCall();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    user = ref.watch(userProvider);
     return Scaffold(
       appBar: const AppbarHome(title: "Add Document"),
       body: Stack(
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 26),
+            padding: const EdgeInsets.only(left: 26, right: 26, bottom: 0),
             child: SingleChildScrollView(
               child: Column(children: [
                 if (categories.isNotEmpty)
@@ -79,10 +89,14 @@ class _AddDocumentState extends State<AddDocument> {
                           items: categories.map<DropdownMenuItem<dynamic>>(
                               (dynamic category) {
                             return DropdownMenuItem<String>(
+                              onTap: () {
+                                setCategory = category;
+                                setState(() {});
+                              },
                               value: category['title'],
                               child: Text(
                                 category['title'],
-                                style: TextStyle(fontSize: 16),
+                                style: const TextStyle(fontSize: 16),
                               ),
                             );
                           }).toList(),
@@ -115,6 +129,7 @@ class _AddDocumentState extends State<AddDocument> {
                       ),
                       textFormFieldApp(
                           name: "Title",
+                          isValidator: true,
                           textValue: title,
                           onValueChanged: (value) {
                             title = value;
@@ -160,10 +175,14 @@ class _AddDocumentState extends State<AddDocument> {
                           items: types
                               .map<DropdownMenuItem<dynamic>>((dynamic type) {
                             return DropdownMenuItem<String>(
+                              onTap: () {
+                                setType = type;
+                                setState(() {});
+                              },
                               value: type['title'],
                               child: Text(
                                 type['title'],
-                                style: TextStyle(fontSize: 16),
+                                style: const TextStyle(fontSize: 16),
                               ),
                             );
                           }).toList(),
@@ -171,15 +190,212 @@ class _AddDocumentState extends State<AddDocument> {
                       ],
                     ),
                   ),
+                const SizedBox(
+                  height: 16,
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                      boxShadow: boxShadow,
+                      color: whiteColor,
+                      borderRadius: BorderRadius.circular(8.7),
+                      border: Border.all(width: 1, color: secondaryColor)),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "University : ",
+                        style: TextStyle(
+                            color: blackColor, fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      GestureDetector(
+                          onTap: () async {
+                            var data = await Navigator.push(
+                              context,
+                              PageRouteAnimator(
+                                child: const UniversityListScreen(),
+                                routeAnimation: RouteAnimation.leftToRight,
+                                duration: const Duration(milliseconds: 500),
+                                curve: Curves.linear,
+                              ),
+                            );
+                            print("data-->$data");
+                            if (data != null) {
+                              university = data;
+                              setState(() {});
+                            }
+                          },
+                          child: Text(
+                            university["title"].toString(),
+                            style: const TextStyle(fontSize: 16),
+                          )),
+                    ],
+                  ),
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                      boxShadow: boxShadow,
+                      color: whiteColor,
+                      borderRadius: BorderRadius.circular(8.7),
+                      border: Border.all(width: 1, color: secondaryColor)),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        "Cover Image : ",
+                        style: TextStyle(
+                            color: blackColor, fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      _image != null
+                          ? Image.file(
+                              _image!,
+                              width: 200,
+                              height: 200,
+                              fit: BoxFit.cover,
+                            )
+                          : const Text('No image selected'),
+                      const SizedBox(height: 20),
+                      GestureDetector(
+                        onTap: _pickImage,
+                        child: Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: primaryColor,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                    blurRadius: 21,
+                                    color: primaryColor.withOpacity(0.25)),
+                              ],
+                            ),
+                            child: Text(
+                              "Pick Image",
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: whiteColor),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                      boxShadow: boxShadow,
+                      color: whiteColor,
+                      borderRadius: BorderRadius.circular(8.7),
+                      border: Border.all(width: 1, color: secondaryColor)),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        "File : ",
+                        style: TextStyle(
+                            color: blackColor, fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      _file != null
+                          ? Text(
+                              'Selected File: ${_file!.split('/').last}',
+                              style: const TextStyle(fontSize: 16),
+                            )
+                          : const Text('No file selected'),
+                      const SizedBox(height: 20),
+                      GestureDetector(
+                        onTap: _pickFile,
+                        child: Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: primaryColor,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                    blurRadius: 21,
+                                    color: primaryColor.withOpacity(0.25)),
+                              ],
+                            ),
+                            child: Text(
+                              "Pick File",
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: whiteColor),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(
+                  height: 24,
+                ),
                 GestureDetector(
-                  onTap: () {
-                    univerityDialog(context);
-                  },
-                  child: Text("!"),
+                  onTap: onSaveDocFile,
+                  child: Container(
+                    height: 51,
+                    // padding: const EdgeInsets.symmetric(
+                    //     horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: primaryColor,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                            blurRadius: 21,
+                            color: primaryColor.withOpacity(0.25)),
+                      ],
+                    ),
+                    child: Center(
+                      child: Text(
+                        "Save Document",
+                        style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: whiteColor),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  height: 30,
                 )
               ]),
             ),
           ),
+          if (isLoading)
+            Center(
+              child: loadingSpinner(),
+            )
         ],
       ),
     );
@@ -193,7 +409,6 @@ class _AddDocumentState extends State<AddDocument> {
         var decode = await jsonDecode(response.body);
         if (decode["code"] == 200) {
           categories.addAll(decode["data"]);
-          print(categories);
           setState(() {});
         } else {
           if (!mounted) return;
@@ -204,7 +419,6 @@ class _AddDocumentState extends State<AddDocument> {
         showAlert(context, "failed to get categories", "error");
       }
     } catch (e) {
-      print(e);
       if (!mounted) return;
       showAlert(context, "failed to get categories", "error");
     }
@@ -233,145 +447,186 @@ class _AddDocumentState extends State<AddDocument> {
     }
   }
 
-  void getUniversityApiCall() async {
-    try {
-      var response =
-          await apiClient(apiEndpoint: "get-university", context: context);
-      if (response.statusCode == 200) {
-        var decode = await jsonDecode(response.body);
-        if (decode["code"] == 200) {
-          universities.addAll(decode["data"]);
-          universitiesCopy = universities;
-          print(universities[0]);
-          setState(() {});
-        } else {
-          if (!mounted) return;
-          showAlert(context, "failed to get types", "error");
-        }
-      } else {
-        if (!mounted) return;
-        showAlert(context, "failed to get types", "error");
-      }
-    } catch (e) {
-      if (!mounted) return;
-      showAlert(context, "failed to get types", "error");
+  Future<void> _pickImage() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      allowMultiple: false,
+    );
+
+    if (result != null) {
+      setState(() {
+        _image = File(result.files.single.path!);
+      });
+    } else {
+      // User canceled the picker
     }
   }
 
-  void univerityDialog(BuildContext context) {
-    showDialog(
-        context: context,
-        builder: (context) {
-          return StatefulBuilder(builder: (context, setSt) {
-            return Container(
-              color: Colors.white,
-              margin: const EdgeInsets.all(8),
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    Material(
-                      child: Container(
-                          margin: const EdgeInsets.all(8),
-                          child: TextField(
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              labelText: 'search location..',
-                              hintText: 'Search Location..',
-                            ),
-                            // controller: locationController,
-                            onChanged: (val) {
-                              setState(() {
-                                if (val.isEmpty) {
-                                  universitiesCopy = universities;
-                                } else {
-                                  universitiesCopy = universities.where((data) {
-                                    var stationName =
-                                        data.stationName!.toLowerCase();
-                                    return stationName.contains(val);
-                                  }).toList();
-                                }
-                              });
-                              setState(() {});
-                            },
-                          )),
-                    ),
-                    AnimationLimiter(
-                      child: ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: universitiesCopy.length,
-                          itemBuilder: (context, index) {
-                            return AnimationConfiguration.staggeredList(
-                              position: index,
-                              duration: const Duration(milliseconds: 500),
-                              child: SlideAnimation(
-                                verticalOffset: 50.0,
-                                child: FadeInAnimation(
-                                  child: GestureDetector(
-                                    onTap: () {},
-                                    child: Container(
-                                        padding: const EdgeInsets.all(6),
-                                        child: Align(
-                                          alignment: Alignment.topLeft,
-                                          child: SizedBox(
-                                              width: MediaQuery.of(context)
-                                                  .size
-                                                  .width,
-                                              child: Card(
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(4),
-                                                  child: Column(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.start,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Text(
-                                                        universitiesCopy[index]
-                                                                ["title"]
-                                                            .toString(),
-                                                        style: const TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontSize: 18,
-                                                            color: Color(
-                                                                0xff0A1E61)),
-                                                      ),
-                                                      // Container(
-                                                      //   margin: const EdgeInsets
-                                                      //       .only(top: 2),
-                                                      //   child: Text(
-                                                      //     getLocationListCopy[
-                                                      //             index]
-                                                      //         .uniqueId
-                                                      //         .toString(),
-                                                      //     style: const TextStyle(
-                                                      //         fontWeight:
-                                                      //             FontWeight
-                                                      //                 .normal,
-                                                      //         fontSize: 16),
-                                                      //   ),
-                                                      // ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              )),
-                                        )),
-                                  ),
-                                ),
-                              ),
-                            );
-                          }),
-                    )
-                  ],
-                ),
-              ),
-            );
-          });
+  Future<void> _pickFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+    if (result != null) {
+      setState(() {
+        _file = result.files.single.path!;
+      });
+    } else {
+      // User canceled the picker
+    }
+  }
+
+  // void onSaveDoc() async {
+  //   if (!mounted) return;
+  //   if (setCategory.isEmpty) {
+  //     showAlert(context, "please select category", "error");
+  //     return;
+  //   }
+
+  //   if (title.isEmpty) {
+  //     showAlert(context, "please enter title", "error");
+  //     return;
+  //   }
+  //   if (setType.isEmpty) {
+  //     showAlert(context, "please select type", "error");
+  //     return;
+  //   }
+  //   if (_image == null) {
+  //     showAlert(context, "please pick image", "error");
+  //     return;
+  //   }
+  //   if (_file == null) {
+  //     showAlert(context, "please select document", "error");
+  //     return;
+  //   }
+  //   setState(() {
+  //     isLoading = true;
+  //   });
+  //   String? mimeType = "";
+  //   if (_image != null) {
+  //     List<int> imageBytes = await _image!.readAsBytes();
+
+  //     // Determine the MIME type dynamically
+  //     mimeType = lookupMimeType(_image!.path);
+
+  //     // If mimeType is null, default to "image/jpeg"
+  //     base64Image = base64Encode(imageBytes);
+  //     // base64Image = "data:$mimeType;base64,$base64Image";
+  //     print("imge-->>${base64Image}");
+  //   }
+  //   try {
+  //     Map<String, dynamic> requestBody = {
+  //       "category_id": setCategory["id"].toString(),
+  //       "title": title,
+  //       "university_id": "1",
+  //       "user_id": user["id"].toString(),
+  //       "image": "data:$mimeType;base64,$base64Image",
+  //       "type_id": setType["id"].toString(),
+  //     };
+
+  //     var response = await apiClient(
+  //         apiEndpoint: "save-study-docs",
+  //         context: context,
+  //         method: "POST",
+  //         requestBody: requestBody);
+  //     if (response.statusCode == 200) {
+  //       var decode = await jsonDecode(response.body);
+  //       if (decode["status"] == 200) {
+  //         setState(() {
+  //           showAlert(context, "document uploaded..", "success");
+  //           setCategory = {};
+  //           setType = {};
+  //           university = {};
+  //           title = "";
+  //           _image = null;
+  //           _file = null;
+  //         });
+  //       } else {
+  //         showAlert(context, "failed to save document..", "error");
+  //       }
+  //     } else {
+  //       showAlert(context, "failed to save document..", "error");
+  //     }
+  //     setState(() {
+  //       isLoading = false;
+  //     });
+  //   } catch (e) {
+  //     setState(() {
+  //       isLoading = false;
+  //       showAlert(context, "failed to save document..", "error");
+  //     });
+  //   }
+  // }
+
+  void onSaveDocFile() async {
+    if (!mounted) return;
+    if (setCategory.isEmpty) {
+      showAlert(context, "please select category", "error");
+      return;
+    }
+
+    if (title.isEmpty) {
+      showAlert(context, "please enter title", "error");
+      return;
+    }
+    if (setType.isEmpty) {
+      showAlert(context, "please select type", "error");
+      return;
+    }
+    if (_image == null) {
+      showAlert(context, "please pick image", "error");
+      return;
+    }
+    if (_file == null) {
+      showAlert(context, "please select document", "error");
+      return;
+    }
+    setState(() {
+      isLoading = true;
+    });
+    String? mimeType = "";
+    if (_image != null) {
+      List<int> imageBytes = await _image!.readAsBytes();
+      mimeType = lookupMimeType(_image!.path);
+      base64Image = base64Encode(imageBytes);
+    }
+    try {
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse(
+            'http://thinkdream.in/hakibah_new/public/api/save-study-docs-with-file'),
+      );
+
+      request.fields['category_id'] = setCategory["id"].toString();
+      request.fields['title'] = title;
+      request.fields['university_id'] = "1";
+      request.fields['user_id'] = user["id"].toString();
+      request.fields['type_id'] = setType["id"].toString();
+      request.fields['image'] = "data:$mimeType;base64,$base64Image";
+      var imageFile = await http.MultipartFile.fromPath('file', _image!.path);
+      request.files.add(imageFile);
+
+      var response = await request.send();
+      if (response.statusCode == 200) {
+        setState(() {
+          showAlert(context, "document uploaded..", "success");
+          setCategory = {};
+          setType = {};
+          university = {};
+          title = "";
+          _image = null;
+          _file = null;
         });
+      } else {
+        if (!mounted) return;
+        showAlert(context, "failed to save document..", "error");
+      }
+      setState(() {
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+        showAlert(context, "failed to save document..", "error");
+      });
+    }
   }
 }

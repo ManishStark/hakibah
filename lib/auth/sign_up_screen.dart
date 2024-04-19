@@ -368,7 +368,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             requestBody: requestBody);
         if (response.statusCode == 200) {
           var decode = await jsonDecode(response.body);
-          if (!context.mounted) return;
+          if (!mounted) return;
           if (decode["code"] == "200") {
             showAlert(context, "Signed up succesful, now login.", "success");
             Navigator.pushReplacement(context,
@@ -377,7 +377,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             showAlert(context, apiErrorString, "error");
           }
         } else {
-          if (!context.mounted) return;
+          if (!mounted) return;
           showAlert(context, apiErrorString, "error");
         }
         setState(() {
