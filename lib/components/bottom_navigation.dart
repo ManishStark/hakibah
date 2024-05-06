@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hakibah/constatns.dart';
 import 'package:hakibah/screens/categories_screen.dart';
 import 'package:hakibah/screens/home_screen.dart';
+import 'package:hakibah/screens/profile_screen.dart';
+import 'package:hakibah/screens/search_screen.dart';
 import 'package:persistent_bottom_nav_bar_v2/persistent-tab-view.dart';
 
 class PresistantNavbar extends ConsumerStatefulWidget {
@@ -28,27 +31,27 @@ class _PresistantNavbarState extends ConsumerState<PresistantNavbar> {
         PersistentBottomNavBarItem(
           contentPadding: 0,
           iconSize: 24,
-          icon: const Icon(Icons.video_collection_rounded),
+          icon: SvgPicture.asset("assets/icons/home.svg"),
           title: "Home",
-          activeColorPrimary: whiteColor,
+          activeColorPrimary: primaryColor,
           inactiveColorPrimary: Colors.grey,
         ),
         PersistentBottomNavBarItem(
-          icon: const Icon(Icons.search),
+          icon: SvgPicture.asset("assets/icons/category.svg"),
+          title: "Category",
+          activeColorPrimary: primaryColor,
+          inactiveColorPrimary: Colors.grey,
+        ),
+        PersistentBottomNavBarItem(
+          icon: SvgPicture.asset("assets/icons/search.svg"),
           title: "Search",
-          activeColorPrimary: whiteColor,
+          activeColorPrimary: primaryColor,
           inactiveColorPrimary: Colors.grey,
         ),
         PersistentBottomNavBarItem(
-          icon: const Icon(Icons.person),
+          icon: SvgPicture.asset("assets/icons/profile.svg"),
           title: "Profile",
-          activeColorPrimary: whiteColor,
-          inactiveColorPrimary: Colors.grey,
-        ),
-        PersistentBottomNavBarItem(
-          icon: const Icon(Icons.person),
-          title: "File",
-          activeColorPrimary: whiteColor,
+          activeColorPrimary: primaryColor,
           inactiveColorPrimary: Colors.grey,
         ),
       ];
@@ -58,8 +61,8 @@ class _PresistantNavbarState extends ConsumerState<PresistantNavbar> {
       return [
         const HomeScreen(),
         const CategoryScreen(),
-        const HomeScreen(),
-        const HomeScreen(),
+        const SearchScreen(),
+        const ProfileScreen(),
       ];
     }
 
@@ -68,16 +71,22 @@ class _PresistantNavbarState extends ConsumerState<PresistantNavbar> {
       child: PersistentTabView(
         context,
         hideNavigationBarWhenKeyboardShows: true,
-        // bottomScreenMargin: 50,
-        resizeToAvoidBottomInset: false,
+        resizeToAvoidBottomInset: true,
         screens: screens(),
-        confineInSafeArea: true,
         navBarHeight: 63,
-        backgroundColor: const Color(0xff292526),
+        decoration: NavBarDecoration(
+            borderRadius: BorderRadius.circular(20),
+            adjustScreenBottomPaddingOnCurve: true),
         items: navBarItems(),
         controller: controller,
-        popAllScreensOnTapAnyTabs: true,
-        navBarStyle: NavBarStyle.style2,
+        stateManagement: true,
+        popAllScreensOnTapOfSelectedTab: true,
+        popAllScreensOnTapAnyTabs: false,
+        screenTransitionAnimation: const ScreenTransitionAnimation(
+            animateTabTransition: true,
+            duration: Duration(milliseconds: 500),
+            curve: Easing.standardAccelerate),
+        navBarStyle: NavBarStyle.style1,
         onItemSelected: ((index) async {}),
       ),
     );

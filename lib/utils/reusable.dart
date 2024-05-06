@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hakibah/constatns.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:page_route_animator/page_route_animator.dart';
 
 Future<void> goToNewScreen(BuildContext context, Widget child) async {
@@ -36,9 +35,39 @@ Widget customButton(
   );
 }
 
-Widget loadingSpinner({Color? color, double? size}) {
-  return LoadingAnimationWidget.threeArchedCircle(
-    color: color ?? primaryColor,
-    size: size ?? 40,
-  );
-}
+// Widget loadingSpinner({Color? color, double? size}) {
+//   return LoadingAnimationWidget.threeArchedCircle(
+//     color: color ?? primaryColor,
+//     size: size ?? 40,
+//   );
+// }
+
+Widget Function(
+  BuildContext context,
+  int index,
+  Animation<double> animation,
+) animationItemBuilder(
+  Widget Function(int index) child, {
+  EdgeInsets padding = EdgeInsets.zero,
+}) =>
+    (
+      BuildContext context,
+      int index,
+      Animation<double> animation,
+    ) =>
+        FadeTransition(
+          opacity: Tween<double>(
+            begin: 0,
+            end: 1,
+          ).animate(animation),
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, -0.1),
+              end: Offset.zero,
+            ).animate(animation),
+            child: Padding(
+              padding: padding,
+              child: child(index),
+            ),
+          ),
+        );

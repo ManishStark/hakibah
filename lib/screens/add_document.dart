@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hakibah/components/appbar.dart';
 import 'package:hakibah/constatns.dart';
 import 'package:hakibah/provider/user_provider.dart';
@@ -30,10 +31,10 @@ class _AddDocumentState extends ConsumerState<AddDocument> {
   var setCategory = {};
   var setType = {};
   String typeValue = "- Select Type -";
-  dynamic university = {"title": "- Select University -"};
+  dynamic university = {"name": "- Select University -"};
   String title = "";
   File? _image;
-  String? _file;
+  File? _file;
   String base64Image = "";
   dynamic user = {};
   bool isLoading = false;
@@ -52,7 +53,8 @@ class _AddDocumentState extends ConsumerState<AddDocument> {
       body: Stack(
         children: [
           Container(
-            padding: const EdgeInsets.only(left: 26, right: 26, bottom: 0),
+            padding:
+                const EdgeInsets.only(left: 26, right: 26, bottom: 20, top: 8),
             child: SingleChildScrollView(
               child: Column(children: [
                 if (categories.isNotEmpty)
@@ -78,6 +80,7 @@ class _AddDocumentState extends ConsumerState<AddDocument> {
                         ),
                         DropdownButton<dynamic>(
                           value: categoryValue,
+                          isExpanded: true,
                           isDense: true,
                           underline: Container(),
                           style: TextStyle(color: blackColor),
@@ -164,6 +167,7 @@ class _AddDocumentState extends ConsumerState<AddDocument> {
                         ),
                         DropdownButton<dynamic>(
                           value: typeValue,
+                          isExpanded: true,
                           isDense: true,
                           underline: Container(),
                           style: TextStyle(color: blackColor),
@@ -224,14 +228,13 @@ class _AddDocumentState extends ConsumerState<AddDocument> {
                                 curve: Curves.linear,
                               ),
                             );
-                            print("data-->$data");
                             if (data != null) {
                               university = data;
                               setState(() {});
                             }
                           },
                           child: Text(
-                            university["title"].toString(),
+                            university["name"].toString(),
                             style: const TextStyle(fontSize: 16),
                           )),
                     ],
@@ -253,48 +256,44 @@ class _AddDocumentState extends ConsumerState<AddDocument> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
-                      Text(
-                        "Cover Image : ",
-                        style: TextStyle(
-                            color: blackColor, fontWeight: FontWeight.w500),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Cover Image : ",
+                            style: TextStyle(
+                                color: blackColor, fontWeight: FontWeight.w500),
+                          ),
+                          GestureDetector(
+                            onTap: _pickImage,
+                            child: CircleAvatar(
+                              radius: 12,
+                              backgroundColor: primaryColor,
+                              child: Icon(
+                                Icons.add,
+                                size: 15,
+                                color: whiteColor,
+                              ),
+                            ),
+                          )
+                        ],
                       ),
                       const SizedBox(
                         height: 10,
                       ),
                       _image != null
-                          ? Image.file(
-                              _image!,
-                              width: 200,
-                              height: 200,
-                              fit: BoxFit.cover,
+                          ? Center(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Image.file(
+                                  _image!,
+                                  width: 200,
+                                  height: 200,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
                             )
                           : const Text('No image selected'),
-                      const SizedBox(height: 20),
-                      GestureDetector(
-                        onTap: _pickImage,
-                        child: Center(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: primaryColor,
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                    blurRadius: 21,
-                                    color: primaryColor.withOpacity(0.25)),
-                              ],
-                            ),
-                            child: Text(
-                              "Pick Image",
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: whiteColor),
-                            ),
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -314,46 +313,37 @@ class _AddDocumentState extends ConsumerState<AddDocument> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
-                      Text(
-                        "File : ",
-                        style: TextStyle(
-                            color: blackColor, fontWeight: FontWeight.w500),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "File : ",
+                            style: TextStyle(
+                                color: blackColor, fontWeight: FontWeight.w500),
+                          ),
+                          GestureDetector(
+                            onTap: _pickFile,
+                            child: CircleAvatar(
+                              radius: 12,
+                              backgroundColor: primaryColor,
+                              child: Icon(
+                                Icons.add,
+                                size: 15,
+                                color: whiteColor,
+                              ),
+                            ),
+                          )
+                        ],
                       ),
                       const SizedBox(
                         height: 10,
                       ),
                       _file != null
                           ? Text(
-                              'Selected File: ${_file!.split('/').last}',
+                              'Selected File: ${_file!.path.split('/').last}',
                               style: const TextStyle(fontSize: 16),
                             )
                           : const Text('No file selected'),
-                      const SizedBox(height: 20),
-                      GestureDetector(
-                        onTap: _pickFile,
-                        child: Center(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: primaryColor,
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                    blurRadius: 21,
-                                    color: primaryColor.withOpacity(0.25)),
-                              ],
-                            ),
-                            child: Text(
-                              "Pick File",
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: whiteColor),
-                            ),
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -363,26 +353,37 @@ class _AddDocumentState extends ConsumerState<AddDocument> {
                 GestureDetector(
                   onTap: onSaveDocFile,
                   child: Container(
-                    height: 51,
+                    height: 50,
                     // padding: const EdgeInsets.symmetric(
                     //     horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
                       color: primaryColor,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(8.7),
                       boxShadow: [
                         BoxShadow(
                             blurRadius: 21,
                             color: primaryColor.withOpacity(0.25)),
                       ],
                     ),
-                    child: Center(
-                      child: Text(
-                        "Save Document",
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: whiteColor),
-                      ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SvgPicture.asset(
+                          "assets/icons/save.svg",
+                          height: 20,
+                          width: 20,
+                        ),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        Text(
+                          "Save Document",
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: whiteColor),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -467,7 +468,7 @@ class _AddDocumentState extends ConsumerState<AddDocument> {
 
     if (result != null) {
       setState(() {
-        _file = result.files.single.path!;
+        _file = File(result.files.single.path!);
       });
     } else {
       // User canceled the picker
@@ -601,7 +602,7 @@ class _AddDocumentState extends ConsumerState<AddDocument> {
       request.fields['user_id'] = user["id"].toString();
       request.fields['type_id'] = setType["id"].toString();
       request.fields['image'] = "data:$mimeType;base64,$base64Image";
-      var imageFile = await http.MultipartFile.fromPath('file', _image!.path);
+      var imageFile = await http.MultipartFile.fromPath('file', _file!.path);
       request.files.add(imageFile);
 
       var response = await request.send();

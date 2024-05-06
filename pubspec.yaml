@@ -51,6 +51,10 @@ dependencies:
   file_picker: ^8.0.0+1
   dio_http_formatter: ^3.2.1
   mime: ^1.0.5
+  flutter_rating_bar: ^4.0.1
+  lottie: ^3.1.0
+  auto_animated: ^3.2.0
+  skeleton_loader: ^2.0.0+4
 
 dev_dependencies:
   flutter_test:

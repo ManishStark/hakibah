@@ -1,34 +1,36 @@
-import 'dart:convert';
-
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hakibah/constatns.dart';
-import 'package:hakibah/utils/api_client.dart';
+import 'package:hakibah/provider/popular_provider.dart';
+import 'package:hakibah/screens/view_documents.dart';
+import 'package:hakibah/utils/reusable.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
-class CarouselSliderWidget extends StatefulWidget {
+class CarouselSliderWidget extends ConsumerStatefulWidget {
   const CarouselSliderWidget({super.key});
 
   @override
-  State<CarouselSliderWidget> createState() => _CarouselSliderWidgetState();
+  ConsumerState<CarouselSliderWidget> createState() =>
+      _CarouselSliderWidgetState();
 }
 
-class _CarouselSliderWidgetState extends State<CarouselSliderWidget> {
+class _CarouselSliderWidgetState extends ConsumerState<CarouselSliderWidget> {
   int activeIndex = 0;
   final controller = CarouselController();
   final double height = 177;
-  final List<dynamic> mainPosterImagesLink = [];
+  dynamic mainPosterImagesLink = [];
   bool isLoading = false;
   @override
   void initState() {
-    getPopularDocuments();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    mainPosterImagesLink = ref.watch(popularProvider);
     return Stack(children: [
-      if (mainPosterImagesLink.isNotEmpty)
+      if (mainPosterImagesLink != null && mainPosterImagesLink.isNotEmpty)
         Column(children: [
           CarouselSlider.builder(
             carouselController: controller,
@@ -59,36 +61,12 @@ class _CarouselSliderWidgetState extends State<CarouselSliderWidget> {
     ]);
   }
 
-  void getPopularDocuments() async {
-    setState(() {
-      isLoading = true;
-    });
-    try {
-      var response = await apiClient(
-          apiEndpoint: "most-populer-document", context: context);
-      if (response.statusCode == 200) {
-        var decode = await jsonDecode(response.body);
-        if (decode["code"] == 200) {
-          mainPosterImagesLink.addAll(decode["data"]);
-          setState(() {});
-        }
-      }
-      setState(() {
-        isLoading = false;
-      });
-    } catch (e) {
-      print(e);
-      setState(() {
-        isLoading = true;
-      });
-    }
-  }
-
   Widget buildImage(dynamic item, int indx, double height) => ClipRRect(
         borderRadius: BorderRadius.circular(10),
         child: GestureDetector(
           onTap: () {
-            showAlert(context, item[indx]["id"].toString(), "success");
+            goToNewScreen(
+                context, ViewDocumentScreen(id: item[indx]["id"].toString()));
           },
           child: Image.network(
             "http://thinkdream.in/hakibah_new/public/images/${mainPosterImagesLink[indx]["image"]}",
@@ -113,7 +91,7 @@ class _CarouselSliderWidgetState extends State<CarouselSliderWidget> {
         effect: ExpandingDotsEffect(
             dotHeight: 7,
             dotWidth: 7,
-            activeDotColor: const Color(0xffF9B023),
-            dotColor: primaryColor),
+            activeDotColor: primaryColor,
+            dotColor: secondaryColor),
       );
 }

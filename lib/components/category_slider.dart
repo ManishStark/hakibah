@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hakibah/constatns.dart';
 import 'package:hakibah/screens/categories_screen.dart';
+import 'package:hakibah/screens/document_list.dart';
 import 'package:hakibah/utils/reusable.dart';
 
 class CategorySlider extends ConsumerStatefulWidget {
@@ -36,13 +37,10 @@ class _CategorySliderState extends ConsumerState<CategorySlider> {
               child: Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-                decoration: BoxDecoration(
-                    color: primaryColor,
-                    borderRadius: BorderRadius.circular(5)),
                 child: Text(
                   "See All",
                   style: TextStyle(
-                      color: whiteColor,
+                      color: primaryColor,
                       fontSize: 12,
                       fontWeight: FontWeight.w600),
                 ),
@@ -79,20 +77,30 @@ class _CategorySliderState extends ConsumerState<CategorySlider> {
           }
           return;
         }
-        if (mounted) {}
+        if (mounted) {
+          goToNewScreen(
+              context,
+              DocumentListScreen(
+                catId: item["id"].toString(),
+                title: item["title"],
+              ));
+        }
       },
       child: Container(
         margin: const EdgeInsets.only(right: 16),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
         decoration: BoxDecoration(
-            // boxShadow: boxShadow,
-            color: whiteColor,
-            borderRadius: BorderRadius.circular(5),
-            border: Border.all(width: 1, color: secondaryColor)),
+          color: primaryColor,
+          boxShadow: boxShadow,
+          borderRadius: BorderRadius.circular(5),
+        ),
         child: Text(
           item["title"],
           style: TextStyle(
-              color: blackColor, fontWeight: FontWeight.w400, fontSize: 14),
+            color: whiteColor,
+            fontWeight: FontWeight.w500,
+            fontSize: 14,
+          ),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),

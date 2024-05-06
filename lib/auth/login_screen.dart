@@ -18,7 +18,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool passObscure = true;
   bool isLoading = false;
   final formKey = GlobalKey<FormState>();
-  String email = "test@gmail.com";
+  String email = "manish02@gmail.com";
   String password = "12345678";
   bool isInternet = true;
   @override

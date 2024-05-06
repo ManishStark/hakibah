@@ -1,31 +1,28 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hakibah/components/appbar.dart';
 import 'package:hakibah/components/drawer_menu.dart';
 import 'package:hakibah/constatns.dart';
+import 'package:hakibah/provider/study_list_provider.dart';
 import 'package:hakibah/utils/api_client.dart';
 import 'package:hakibah/utils/reusable.dart';
 
-class StudyListScreen extends StatefulWidget {
+class StudyListScreen extends ConsumerStatefulWidget {
   const StudyListScreen({super.key});
 
   @override
-  State<StudyListScreen> createState() => _StudyListScreenState();
+  ConsumerState<StudyListScreen> createState() => _StudyListScreenState();
 }
 
-class _StudyListScreenState extends State<StudyListScreen> {
+class _StudyListScreenState extends ConsumerState<StudyListScreen> {
   bool isLoading = false;
-  List<dynamic> studyList = [];
-  @override
-  void initState() {
-    getStudyListApicall();
-    super.initState();
-  }
+  dynamic studyList = [];
 
   @override
   Widget build(BuildContext context) {
+    studyList = ref.watch(studyListProvider);
+
     return Scaffold(
       appBar: AppbarHome(
         title: "Study List",
@@ -36,7 +33,7 @@ class _StudyListScreenState extends State<StudyListScreen> {
       body: Stack(
         children: [
           if (studyList.isNotEmpty)
-            Container(
+            SizedBox(
               child: ListView.builder(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 26, vertical: 14),
@@ -157,7 +154,7 @@ class _StudyListScreenState extends State<StudyListScreen> {
                           } else {
                             if (!context.mounted) return;
 
-                            showAlert(context, "failed to12 create study list",
+                            showAlert(context, "failed to create study list",
                                 "error");
                           }
 
@@ -165,12 +162,11 @@ class _StudyListScreenState extends State<StudyListScreen> {
                             isStudyLoading = false;
                           });
                         } catch (e) {
-                          print(e);
                           setState(() {
                             isStudyLoading = false;
                           });
-                          showAlert(context, "failed to13 create study list",
-                              "error");
+                          showAlert(
+                              context, "failed to create study list", "error");
                         }
                       },
                       child: customButton(
