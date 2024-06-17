@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hakibah/constatns.dart';
+import 'package:hakibah/screens/new_view_documents.dart';
 import 'package:hakibah/screens/view_documents.dart';
 import 'package:hakibah/utils/reusable.dart';
 
@@ -16,8 +17,8 @@ class _DocumentCardState extends State<DocumentCard> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        goToNewScreen(
-            context, ViewDocumentScreen(id: widget.document["id"].toString()));
+        goToNewScreen(context,
+            NewViewDocumentScreen(id: widget.document["id"].toString()));
       },
       child: Container(
         padding: const EdgeInsets.all(8),

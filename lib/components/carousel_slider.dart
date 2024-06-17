@@ -18,7 +18,7 @@ class CarouselSliderWidget extends ConsumerStatefulWidget {
 class _CarouselSliderWidgetState extends ConsumerState<CarouselSliderWidget> {
   int activeIndex = 0;
   final controller = CarouselController();
-  final double height = 177;
+  final double height = 200;
   dynamic mainPosterImagesLink = [];
   bool isLoading = false;
   @override
@@ -29,6 +29,7 @@ class _CarouselSliderWidgetState extends ConsumerState<CarouselSliderWidget> {
   @override
   Widget build(BuildContext context) {
     mainPosterImagesLink = ref.watch(popularProvider);
+    print("Popuilar--->$mainPosterImagesLink");
     return Stack(children: [
       if (mainPosterImagesLink != null && mainPosterImagesLink.isNotEmpty)
         Column(children: [
@@ -61,24 +62,88 @@ class _CarouselSliderWidgetState extends ConsumerState<CarouselSliderWidget> {
     ]);
   }
 
-  Widget buildImage(dynamic item, int indx, double height) => ClipRRect(
-        borderRadius: BorderRadius.circular(10),
-        child: GestureDetector(
-          onTap: () {
-            goToNewScreen(
-                context, ViewDocumentScreen(id: item[indx]["id"].toString()));
-          },
-          child: Image.network(
-            "http://thinkdream.in/hakibah_new/public/images/${mainPosterImagesLink[indx]["image"]}",
-            fit: BoxFit.fill,
-            errorBuilder: (BuildContext context, Object exception,
-                StackTrace? stackTrace) {
-              return errorWidget(height: height, width: height);
-            },
-            height: height,
+  Widget buildImage(dynamic item, int indx, double height) {
+    return GestureDetector(
+      onTap: () {
+        goToNewScreen(
+            context, ViewDocumentScreen(id: item[indx]["id"].toString()));
+      },
+      child: Container(
+        height: height,
+        width: double.infinity,
+        decoration: BoxDecoration(
+            color: const Color(0xffEEEEEE),
+            borderRadius: BorderRadius.circular(10)),
+        child: Stack(alignment: Alignment.bottomCenter, children: [
+          Center(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.network(
+                "http://thinkdream.in/hakibah_new/public/images/${mainPosterImagesLink[indx]["image"]}",
+                fit: BoxFit.fill,
+                width: double.infinity,
+                errorBuilder: (BuildContext context, Object exception,
+                    StackTrace? stackTrace) {
+                  return errorWidget(height: height, width: height);
+                },
+                height: height,
+              ),
+            ),
           ),
-        ),
-      );
+          Container(
+            width: double.infinity,
+            alignment: Alignment.topLeft,
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Text(
+                  item[indx]["title"],
+                  style: TextStyle(
+                      color: whiteColor,
+                      fontSize: 20,
+                      height: 26 / 20,
+                      fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Text(
+                  "by: ${item[indx]["user"]["first_name"]}",
+                  style: TextStyle(
+                      color: whiteColor,
+                      fontSize: 14,
+                      height: 12 / 14,
+                      fontWeight: FontWeight.w500),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Container(
+                width: 150,
+                height: 35,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                decoration: BoxDecoration(
+                    color: whiteColor, borderRadius: BorderRadius.circular(20)),
+                child: Center(
+                  child: Text(
+                    "Start Learning",
+                    style: TextStyle(
+                        fontSize: 14,
+                        color: blackColor,
+                        fontWeight: FontWeight.w600),
+                  ),
+                ),
+              )),
+        ]),
+      ),
+    );
+  }
+
   Widget buildIndicator() => AnimatedSmoothIndicator(
         activeIndex: activeIndex,
         onDotClicked: (index) {

@@ -86,7 +86,7 @@ class _PresistantNavbarState extends ConsumerState<PresistantNavbar> {
             animateTabTransition: true,
             duration: Duration(milliseconds: 500),
             curve: Easing.standardAccelerate),
-        navBarStyle: NavBarStyle.style1,
+        navBarStyle: NavBarStyle.style2,
         onItemSelected: ((index) async {}),
       ),
     );

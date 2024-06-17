@@ -4,8 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 
 String appName = "Hakibah";
-Color primaryColor = const Color(0xff17b862);
-Color secondaryColor = const Color.fromARGB(255, 225, 224, 224);
+Color primaryColor = const Color(0xff42c6a5);
+Color secondaryColor = const Color(0xffEBF3EF);
 Color whiteColor = Colors.white;
 Color blackColor = Colors.black;
 String noInternetString = "No Internet..";
@@ -83,6 +83,7 @@ Widget textFormFieldApp(
     required String textValue,
     String? hintText,
     bool isValidator = true,
+    required BuildContext context,
     required void Function(String) onValueChanged}) {
   return Padding(
     padding: const EdgeInsets.only(bottom: 15),
@@ -90,6 +91,9 @@ Widget textFormFieldApp(
         keyboardType: TextInputType.text,
         textAlign: TextAlign.left,
         initialValue: textValue,
+        onTapOutside: (e) {
+          FocusScope.of(context).unfocus();
+        },
         validator: isValidator
             ? (value) {
                 if (value == null || value.isEmpty) {
@@ -195,3 +199,18 @@ List<BoxShadow> boxShadow = [
     ),
   ),
 ];
+
+Future<void> setInterestCategory(String token) async {
+  var pref = await SharedPreferences.getInstance();
+  pref.setString("interest_category", token);
+}
+
+Future<String> getInterestCategory() async {
+  var pref = await SharedPreferences.getInstance();
+  var authToken = pref.getString("interest_category");
+  if (authToken != null && authToken.isNotEmpty) {
+    return authToken;
+  } else {
+    return "";
+  }
+}

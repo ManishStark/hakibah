@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:bouncing_widget/bouncing_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
@@ -13,160 +12,89 @@ import 'package:hakibah/provider/user_provider.dart';
 import 'package:hakibah/utils/api_client.dart';
 import 'package:hakibah/utils/reusable.dart';
 import 'package:hakibah/utils/reusable_api.dart';
-import 'package:lottie/lottie.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:http/http.dart' as http;
 
-class ViewDocumentScreen extends ConsumerStatefulWidget {
+class NewViewDocumentScreen extends ConsumerStatefulWidget {
   final String id;
-  const ViewDocumentScreen({required this.id, super.key});
+  const NewViewDocumentScreen({required this.id, super.key});
 
   @override
-  ConsumerState<ViewDocumentScreen> createState() => _ViewDocumentScreenState();
+  ConsumerState<NewViewDocumentScreen> createState() =>
+      _NewViewDocumentScreenState();
 }
 
-class _ViewDocumentScreenState extends ConsumerState<ViewDocumentScreen> {
+class _NewViewDocumentScreenState extends ConsumerState<NewViewDocumentScreen> {
   dynamic document = {};
-  bool isLoading = true;
+  bool isLoading = false;
   bool isUpdating = false;
   bool isInternet = true;
   dynamic user = {};
   dynamic wholeStudyList = [];
   bool isSaving = false;
-  bool noData = false;
-
+  bool isSavingComment = false;
+  String comment = "";
+  final formkey = GlobalKey<FormState>();
+  dynamic commentsList = [];
   @override
   void initState() {
     checkConnectivity();
     getDocumentApiCall();
+    getCommentsApi();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     user = ref.watch(userProvider);
-    wholeStudyList = ref.watch(studyListProvider);
     return Scaffold(
-      appBar: const AppbarHome(title: "View Docuement"),
+      appBar: const AppbarHome(title: "View Doc"),
       drawer: const HomeDrawer(),
-      body: Stack(
-        children: [
+      body: DefaultTabController(
+        length: 3,
+        child: Stack(children: [
           if (!isLoading && isInternet)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 16),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10)),
-                      alignment: Alignment.center,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.network(
-                          "http://thinkdream.in/hakibah_new/public/images/${document["image"]}",
-                          errorBuilder: (context, error, stackTrace) {
-                            return Image.asset(
-                              "assets/images/logo.png",
-                              height: 250,
-                              width: double.infinity,
-                              fit: BoxFit.contain,
-                            );
-                          },
-                          height: 250,
+            Column(
+              children: [
+                // Add an image here
+                Container(
+                  decoration:
+                      BoxDecoration(borderRadius: BorderRadius.circular(10)),
+                  alignment: Alignment.center,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.network(
+                      "http://thinkdream.in/hakibah_new/public/images/${document["image"]}",
+                      errorBuilder: (context, error, stackTrace) {
+                        return Image.asset(
+                          "assets/images/logo.png",
+                          height: 150,
                           width: double.infinity,
-                          fit: BoxFit.fill,
-                        ),
-                      ),
-                    ),
-                    showDetails("Title", document["title"] ?? ""),
-                    showDetails(
-                        "Category", document["category"]["title"] ?? ""),
-                    showDetails(
-                        "University", document["university"]["name"] ?? ""),
-                    const SizedBox(
-                      height: 16,
-                    ),
-                    Center(
-                      child: BouncingWidget(
-                        onPressed: () {
-                          showAddToStudyDialog(wholeStudyList);
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          width: 250,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            color: secondaryColor,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              CircleAvatar(
-                                radius: 12,
-                                backgroundColor: primaryColor,
-                                child: Icon(
-                                  Icons.add,
-                                  size: 15,
-                                  color: whiteColor,
-                                ),
-                              ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              const Text("Add To Study List"),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 16,
-                    ),
-                    showDetails("Owner Name", document["category"]["title"]),
-                    showDetails("Total View", document["category"]["title"]),
-                    const Text(
-                      "Your Rating :",
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                    ),
-                    const SizedBox(
-                      height: 4,
-                    ),
-                    RatingBar.builder(
-                      initialRating: (document != null &&
-                              document["rating"] != null &&
-                              document["rating"]["rating"] != null)
-                          ? double.parse(
-                              document["rating"]["rating"].toString())
-                          : 0.0,
-                      minRating: 1,
-                      direction: Axis.horizontal,
-                      allowHalfRating: true,
-                      itemCount: 5,
-                      itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      itemBuilder: (context, _) => const Icon(
-                        Icons.star_border_rounded,
-                        color: Colors.amber,
-                        size: 15,
-                      ),
-                      onRatingUpdate: (rating) {
-                        addRating(rating.toString());
+                          fit: BoxFit.contain,
+                        );
                       },
+                      height: 150,
+                      width: double.infinity,
+                      fit: BoxFit.contain,
                     ),
-                    const SizedBox(
-                      height: 16,
-                    ),
-                    Center(child: customButton(title: "Download", height: 40)),
-                    const SizedBox(
-                      height: 30,
-                    )
+                  ),
+                ),
+                // Create a TabBar
+                const TabBar(
+                  tabs: [
+                    Tab(text: "Details"),
+                    Tab(text: "Files"),
+                    Tab(text: "Discussions"),
                   ],
                 ),
-              ),
+                Expanded(
+                  child: TabBarView(
+                    children: [
+                      documentDetails(),
+                      downloadButton(),
+                      addCommentComponent(),
+                    ],
+                  ),
+                ),
+              ],
             ),
           if (isLoading)
             Center(
@@ -186,58 +114,21 @@ class _ViewDocumentScreenState extends ConsumerState<ViewDocumentScreen> {
             Center(
               child: loadingSpinner(),
             )
-        ],
+        ]),
       ),
     );
   }
 
-  Widget noItemFound() {
-    return LottieBuilder.asset(
-      "assets/anim/no_item.json",
-      width: double.infinity,
-      height: 300,
+  Widget downloadButton() {
+    return Column(
+      children: [
+        const SizedBox(
+          height: 16,
+        ),
+        customButton(title: "Download", height: 40),
+      ],
     );
   }
-
-  // Future<String> downloadAndSavePDF(String url, String name) async {
-  //   Directory? extDir = await getExternalStorageDirectory();
-  //   if (extDir == null) {
-  //     // Handle case when external storage directory is not available
-  //     return '';
-  //   }
-  //   DateTime currentDateTime = DateTime.now();
-  //   int currentTimestamp = currentDateTime.millisecondsSinceEpoch;
-  //   String extPath = extDir.path;
-  //   String filePath = '$extPath/OkAvFxCredit_${name}_$currentTimestamp.pdf';
-
-  //   var status = await Permission.manageExternalStorage.request();
-  //   if (status.isGranted) {
-  //     var response = await http.get(Uri.parse(url));
-  //     File file = File(filePath);
-  //     print(response.bodyBytes);
-  //     await file.writeAsBytes(response.bodyBytes);
-  //     showAlert(
-  //         context, "Downloaded", 'PDF downloaded and saved to: $filePath');
-  //     print('PDF downloaded and saved to: $filePath');
-
-  //     return filePath;
-  //   } else if (status.isDenied) {
-  //     if (context.mounted) {
-  //       showAlert(context, "Error", "Please allow storage permission..",
-  //           type: "Error");
-  //     }
-  //     return "";
-  //   } else if (status.isPermanentlyDenied) {
-  //     if (context.mounted) {
-  //       showAlert(context, "Error", "Storage permission is permanently denied.",
-  //           type: "Error");
-  //     }
-  //     return "";
-  //   } else {
-  //     await Permission.storage.request();
-  //     return "";
-  //   }
-  // }
 
   void getDocumentApiCall() async {
     setState(() {
@@ -271,9 +162,206 @@ class _ViewDocumentScreenState extends ConsumerState<ViewDocumentScreen> {
     }
   }
 
-  void checkInternet() async {
-    isInternet = await checkConnectivity();
-    setState(() {});
+  Widget addCommentComponent() {
+    return Stack(children: [
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 8),
+        child: Column(
+          children: [
+            Form(
+              key: formkey,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: textFormFieldApp(
+                        context: context,
+                        name: "Add Comment",
+                        textValue: "",
+                        onValueChanged: (value) {
+                          comment = value;
+                        }),
+                  ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  GestureDetector(
+                      onTap: () {
+                        if (comment.isEmpty) {
+                          showAlert(
+                              context, "please enter a comment...", "error");
+                          return;
+                        }
+                        saveCommentApi();
+                      },
+                      child: customButton(title: "Save", width: 80, height: 45))
+                ],
+              ),
+            ),
+            if (commentsList.isNotEmpty)
+              ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: commentsList.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Text(
+                        commentsList[index]["comment"],
+                        style: TextStyle(color: blackColor, fontSize: 15),
+                      ),
+                    );
+                  })
+          ],
+        ),
+      ),
+      if (isSavingComment)
+        Center(
+          child: loadingSpinner(color: primaryColor),
+        )
+    ]);
+  }
+
+  void saveCommentApi() async {
+    setState(() {
+      isSavingComment = true;
+    });
+    try {
+      Map<String, dynamic> requestBody = {
+        "user_id": user["id"].toString(),
+        "document_id": widget.id,
+        "comment": comment,
+      };
+      var response = await apiClient(
+          apiEndpoint: "add-comment-to-a-document",
+          context: context,
+          method: "POST",
+          requestBody: requestBody);
+      if (!mounted) return;
+      if (response.statusCode == 200) {
+        await getCommentsApi();
+        formkey.currentState!.reset();
+        if (!mounted) return;
+        showAlert(context, "comment added..", "success");
+        setState(() {});
+      } else {
+        showAlert(context, "failed to add comment.1.", "error");
+      }
+      setState(() {
+        isSavingComment = false;
+      });
+    } catch (e) {
+      print("errorr->$e");
+      setState(() {
+        showAlert(context, "failed to add comment.2.", "error");
+
+        isSavingComment = false;
+      });
+    }
+  }
+
+  Future<void> getCommentsApi() async {
+    try {
+      var response = await apiClient(
+        apiEndpoint: "get-document-comments/${widget.id}",
+        context: context,
+      );
+      if (response.statusCode == 200) {
+        commentsList.clear();
+        var decode = await jsonDecode(response.body);
+        commentsList.addAll(decode["data"]);
+        print("commenct list-->$commentsList");
+        setState(() {});
+      }
+    } catch (e) {}
+  }
+
+  Widget documentDetails() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          showDetails("Title", document["title"] ?? ""),
+          showDetails(
+              "Category",
+              document["category"] != null
+                  ? document["category"]["title"] ?? ""
+                  : ""),
+          showDetails("University", document["university"]["name"] ?? ""),
+          const SizedBox(
+            height: 16,
+          ),
+          Center(
+            child: BouncingWidget(
+              onPressed: () {
+                showAddToStudyDialog(wholeStudyList);
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                width: 250,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  color: secondaryColor,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    CircleAvatar(
+                      radius: 12,
+                      backgroundColor: primaryColor,
+                      child: Icon(
+                        Icons.add,
+                        size: 15,
+                        color: whiteColor,
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    const Text("Add To Study List"),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(
+            height: 16,
+          ),
+          showDetails("Owner Name", document["category"]["title"]),
+          showDetails("Total View", document["category"]["title"]),
+          const Text(
+            "Your Rating :",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(
+            height: 4,
+          ),
+          RatingBar.builder(
+            initialRating: (document != null &&
+                    document["rating"] != null &&
+                    document["rating"]["rating"] != null)
+                ? double.parse(document["rating"]["rating"].toString())
+                : 0.0,
+            minRating: 1,
+            direction: Axis.horizontal,
+            allowHalfRating: true,
+            itemCount: 5,
+            itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
+            itemBuilder: (context, _) => const Icon(
+              Icons.star_border_rounded,
+              color: Colors.amber,
+              size: 15,
+            ),
+            onRatingUpdate: (rating) {
+              addRating(rating.toString());
+            },
+          ),
+          const SizedBox(
+            height: 16,
+          ),
+        ],
+      ),
+    );
   }
 
   Widget showDetails(String title, String data) {

@@ -72,6 +72,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           fontWeight: FontWeight.w400),
                     ),
                     textFormFieldApp(
+                        context: context,
                         name: "first name",
                         hintText: "Enter first name",
                         textValue: email,
@@ -89,6 +90,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           fontWeight: FontWeight.w400),
                     ),
                     textFormFieldApp(
+                        context: context,
                         name: "last name",
                         hintText: "Enter last name",
                         textValue: email,
@@ -106,6 +108,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           fontWeight: FontWeight.w400),
                     ),
                     textFormFieldApp(
+                        context: context,
                         name: "username",
                         hintText: "Enter username",
                         textValue: email,
@@ -123,6 +126,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           fontWeight: FontWeight.w400),
                     ),
                     textFormFieldApp(
+                        context: context,
                         name: "Email Address",
                         hintText: "Youraddress@email.com",
                         textValue: email,

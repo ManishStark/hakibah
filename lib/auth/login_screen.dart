@@ -5,6 +5,7 @@ import 'package:hakibah/auth/sign_up_screen.dart';
 import 'package:hakibah/components/bottom_navigation.dart';
 import 'package:hakibah/constatns.dart';
 import 'package:hakibah/provider/user_provider.dart';
+import 'package:hakibah/screens/select_category_screen.dart';
 import 'package:hakibah/utils/api_client.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -77,6 +78,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             fontWeight: FontWeight.w400),
                       ),
                       textFormFieldApp(
+                          context: context,
                           name: "Email Address",
                           hintText: "Youraddress@email.com",
                           textValue: email,
@@ -250,10 +252,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ref.read(userProvider.notifier).setUser(decode["data"]["user"]);
             if (!mounted) return;
             showAlert(context, "login succesful", "success");
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const PresistantNavbar()));
+            String isInterestCategory = await getInterestCategory();
+            if (!mounted) return;
+            if (isInterestCategory.isEmpty) {
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const SelectCategoryScreen()));
+            } else {
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const PresistantNavbar()));
+            }
           } else if (decode["code"] == "403") {
             showAlert(context, "email or password is invalid.", "error");
           } else {

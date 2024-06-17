@@ -11,6 +11,7 @@ import 'package:hakibah/provider/popular_provider.dart';
 import 'package:hakibah/provider/recent_provider.dart';
 import 'package:hakibah/provider/user_provider.dart';
 import 'package:hakibah/screens/add_document.dart';
+import 'package:hakibah/screens/new_view_documents.dart';
 import 'package:hakibah/screens/view_documents.dart';
 import 'package:hakibah/utils/reusable.dart';
 import 'package:hakibah/utils/reusable_api.dart';
@@ -54,10 +55,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             height: MediaQuery.of(context).size.height,
             child: Column(
               children: [
-                const Search(),
-                const SizedBox(
-                  height: 16,
-                ),
+                // const Search(),
+
                 Expanded(
                   child: SingleChildScrollView(
                     child: Column(
@@ -80,23 +79,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600),
                             ),
-                            // GestureDetector(
-                            //   onTap: () {},
-                            //   child: Container(
-                            //     padding: const EdgeInsets.symmetric(
-                            //         horizontal: 12, vertical: 2),
-                            //     decoration: BoxDecoration(
-                            //         color: primaryColor,
-                            //         borderRadius: BorderRadius.circular(5)),
-                            //     child: Text(
-                            //       "See All",
-                            //       style: TextStyle(
-                            //           color: whiteColor,
-                            //           fontSize: 12,
-                            //           fontWeight: FontWeight.w600),
-                            //     ),
-                            //   ),
-                            // )
                           ],
                         ),
                         const SizedBox(
@@ -110,34 +92,76 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               itemBuilder: (context, index) {
                                 return GestureDetector(
                                   onTap: () {
+                                    //             .toString())))
                                     goToNewScreen(
                                         context,
-                                        ViewDocumentScreen(
+                                        NewViewDocumentScreen(
                                             id: recentDocuments[index]["id"]
                                                 .toString()));
                                   },
                                   child: Container(
                                     margin: const EdgeInsets.only(bottom: 10),
                                     padding: const EdgeInsets.all(4),
-                                    decoration: BoxDecoration(
-                                        border: Border.all(
-                                            color: secondaryColor, width: 1),
-                                        borderRadius:
-                                            BorderRadius.circular(10)),
-                                    child: Row(
+                                    child: Column(
                                       children: [
-                                        Image.asset(
-                                          "assets/images/logo.png",
-                                          height: 50,
-                                          width: 50,
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Container(
+                                              height: 90,
+                                              width: 90,
+                                              decoration: BoxDecoration(
+                                                  color: secondaryColor,
+                                                  border: Border.all(
+                                                      color: secondaryColor,
+                                                      width: 1),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          10)),
+                                              child: Image.asset(
+                                                "assets/images/logo.png",
+                                                height: 50,
+                                                width: 50,
+                                              ),
+                                            ),
+                                            const SizedBox(
+                                              width: 10,
+                                            ),
+                                            Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  recentDocuments[index]
+                                                      ["title"],
+                                                  style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.w700),
+                                                ),
+                                                const SizedBox(
+                                                  height: 8,
+                                                ),
+                                                Text(
+                                                  "by: ${recentDocuments[index]["user"]["first_name"]}",
+                                                  style: const TextStyle(
+                                                      color: Color(0xffA1A1A1),
+                                                      fontSize: 14,
+                                                      height: 12 / 14,
+                                                      fontWeight:
+                                                          FontWeight.w500),
+                                                ),
+                                              ],
+                                            )
+                                          ],
                                         ),
                                         const SizedBox(
-                                          width: 10,
+                                          height: 8,
                                         ),
-                                        Text(
-                                          recentDocuments[index]["title"],
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.w500),
+                                        const Divider(
+                                          color: Color(0xffe5e5e5),
                                         )
                                       ],
                                     ),
@@ -154,20 +178,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ],
             ),
           ),
-          Positioned(
-            bottom: 30.0,
-            right: 16.0,
-            child: FloatingActionButton(
-              backgroundColor: primaryColor,
-              onPressed: () {
-                goToNewScreen(context, const AddDocument());
-              },
-              child: Icon(
-                Icons.upload,
-                color: whiteColor,
-              ),
-            ),
-          ),
+          // Positioned(
+          //   bottom: 30.0,
+          //   right: 16.0,
+          //   child: FloatingActionButton(
+          //     backgroundColor: primaryColor,
+          //     onPressed: () {
+          //       goToNewScreen(context, const AddDocument());
+          //     },
+          //     child: Icon(
+          //       Icons.upload,
+          //       color: whiteColor,
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );

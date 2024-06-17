@@ -7,6 +7,7 @@ import 'package:hakibah/components/document_card.dart';
 import 'package:hakibah/constatns.dart';
 import 'package:hakibah/utils/api_client.dart';
 import 'package:hakibah/utils/reusable.dart';
+import 'package:lottie/lottie.dart';
 import 'package:skeleton_loader/skeleton_loader.dart';
 
 class DocumentListScreen extends StatefulWidget {
@@ -22,6 +23,7 @@ class DocumentListScreen extends StatefulWidget {
 class _DocumentListScreenState extends State<DocumentListScreen> {
   bool isLoading = false;
   dynamic documentsList = [];
+  bool noData = false;
   @override
   void initState() {
     getDocumentsApiCall();
@@ -72,6 +74,7 @@ class _DocumentListScreenState extends State<DocumentListScreen> {
           //         return DocumentCard(document: documentsList[index]);
           //       }),
           // ),
+          if (!isLoading && noData) noItemFound(),
           if (isLoading)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 16),
@@ -118,6 +121,14 @@ class _DocumentListScreenState extends State<DocumentListScreen> {
     );
   }
 
+  Widget noItemFound() {
+    return LottieBuilder.asset(
+      "assets/anim/no_item.json",
+      width: double.infinity,
+      height: 300,
+    );
+  }
+
   void getDocumentsApiCall() async {
     setState(() {
       isLoading = true;
@@ -131,6 +142,12 @@ class _DocumentListScreenState extends State<DocumentListScreen> {
           setState(() {
             documentsList = decode["data"];
           });
+        } else if (decode["code"] == 404) {
+          setState(() {
+            noData = true;
+          });
+          if (!mounted) return;
+          showAlert(context, "no documents found..", "error");
         } else {
           if (!mounted) return;
           showAlert(context, "failed to get documents", "error");

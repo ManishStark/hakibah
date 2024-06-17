@@ -31,28 +31,40 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
       body: Stack(children: [
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 10),
-          child: ListView.builder(
+          child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  childAspectRatio: 1.6,
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16),
               itemCount: categories.length,
               itemBuilder: (contex, index) {
-                return Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  margin: const EdgeInsets.only(bottom: 10),
-                  decoration: BoxDecoration(
-                      border: Border.all(width: 1, color: secondaryColor),
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Row(
-                    children: [
-                      Image.asset(
-                        "assets/images/logo.png",
-                        height: 24,
-                        width: 24,
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      Text(categories[index]["title"]),
-                    ],
+                return GestureDetector(
+                  onTap: () {},
+                  child: Container(
+                    height: 120,
+                    decoration: BoxDecoration(
+                        border: Border.all(width: 1, color: secondaryColor),
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Stack(
+                      children: [
+                        if (categories[index]["image"] != null)
+                          Image.network(
+                            categories[index]["image"],
+                            fit: BoxFit.fill,
+                            errorBuilder: (context, error, stackTrace) {
+                              return errorWidget(height: 120);
+                            },
+                          ),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        Text(
+                          categories[index]["title"],
+                          style: TextStyle(color: blackColor),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               }),

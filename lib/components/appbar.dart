@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hakibah/constatns.dart';
+import 'package:hakibah/screens/search_screen.dart';
+import 'package:hakibah/utils/reusable.dart';
 
 class AppbarHome extends StatefulWidget implements PreferredSizeWidget {
   final String title;
   final bool isBackButton;
   final bool isStudyButton;
+  final bool isMenu;
   final Function()? addStudy;
   const AppbarHome(
       {required this.title,
       this.isBackButton = true,
       this.isStudyButton = false,
+      this.isMenu = true,
       this.addStudy,
       super.key});
 
@@ -52,6 +56,17 @@ class _AppbarHomeState extends State<AppbarHome> {
           ],
         ),
         actions: [
+          if (widget.isMenu)
+            GestureDetector(
+              onTap: () {
+                goToNewScreen(context, const SearchScreen());
+              },
+              child: const Icon(Icons.search_rounded),
+            ),
+          if (widget.isMenu)
+            const SizedBox(
+              width: 16,
+            ),
           if (widget.isStudyButton)
             GestureDetector(
               onTap: widget.addStudy,
@@ -61,12 +76,13 @@ class _AppbarHomeState extends State<AppbarHome> {
             const SizedBox(
               width: 16,
             ),
-          GestureDetector(
-            onTap: () {
-              Scaffold.of(context).openDrawer();
-            },
-            child: const Icon(Icons.menu),
-          )
+          if (widget.isMenu)
+            GestureDetector(
+              onTap: () {
+                Scaffold.of(context).openDrawer();
+              },
+              child: const Icon(Icons.menu),
+            )
         ],
       ),
     );
